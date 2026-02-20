@@ -1,0 +1,8 @@
+---
+title: "LI-5350A_DIC_Analysis"
+author: "Tianyin Ouyang"
+date: "2026-02-20"
+output: html_document
+---
+
+This R script is written to analyze CVS data files generated via DIC C5-12T v4.5 software using Apollo SciTech LI-5350A DIC analyzer (LI-COR Environmental, USA). 
