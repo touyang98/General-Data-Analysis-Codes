@@ -35,3 +35,29 @@ data <- read_delim(url, delim = ";",  show_col_types = FALSE)
 view(data)
 ```
 
+##Clean and reorganize the data table 
+This step removes unnecessary columns and rows for the purpose of calculating [DIC].
+```{r}
+data <- data.frame(data[,c(3,5,14,17)])
+data <- subset(data, data$Status != "Excluded")
+view(data)
+```
+
+##Construct the calibration curve 
+```{r}
+std_conc <- 3000 ##replace with [DIC] (uM) in your standards
+
+##calculate means of each calibration curve points
+Cal <- aggregate(`Area..net.`~`Sample.Name` + `Volume..ml.`, data = data[1:9,], FUN = mean)
+
+##linear regression fit of the calibration curve
+fit <- lm(Cal$Area..net.~ I(std_conc*(Cal$Volume..ml./1000)))
+##check information of the linear regression fit
+summary(fit)
+
+##plot the calibration curve 
+eq <- paste0("y = ",round(coef(fit)[2],2), " x + ",round(coef(fit)[1],2))
+
+ggplot(Cal,aes(x = std_conc*(Volume..ml./1000), y = Area..net.)) + geom_point(size = 3) + geom_smooth(method = "lm", linetype = "dashed", linewidth = 1.5, color = "lightblue3") + theme_bw() + theme(panel.grid = element_line(color = "gray", linewidth = 0.2, linetype = "dashed"), axis.title = element_text(size = 12, face = "bold"), axis.text = element_text(size = 12)) + ylab("Instrumental Signals") + xlab(expression(bold("[DIC] "*mu*"M"))) + annotate(geom = "text", label = eq, x = -Inf, y = Inf, hjust = -0.1, vjust = 2,fontface = "bold",size = 4.5, color = "navy")
+```
+
