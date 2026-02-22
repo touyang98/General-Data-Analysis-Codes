@@ -16,35 +16,9 @@ not hesitate to reach out to Tia Ouyang (<touyang@umces.edu>).
 
 ``` r
 if (!require("googledrive")) install.packages("googledrive")
-```
-
-    ## Loading required package: googledrive
-
-``` r
 if (!require("tidyverse")) install.packages("tidyverse")
-```
-
-    ## Loading required package: tidyverse
-
-    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-    ## ✔ dplyr     1.2.0     ✔ readr     2.1.6
-    ## ✔ forcats   1.0.1     ✔ stringr   1.6.0
-    ## ✔ ggplot2   4.0.2     ✔ tibble    3.3.1
-    ## ✔ lubridate 1.9.5     ✔ tidyr     1.3.2
-    ## ✔ purrr     1.2.1     
-    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
-    ## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
-
-``` r
 if (!require("ggplot2")) install.packages("ggplot2")
 if (!require("writexl")) install.packages("writexl")
-```
-
-    ## Loading required package: writexl
-
-``` r
 if (!require("readr")) install.packages("readr")
 
 library(googledrive)
@@ -69,12 +43,7 @@ file_id <- "1wINgFaJyzGOTKv5hurTC9eaPycqkR_TZ" ##replace with your own file ID
 
 url <- paste0("https://drive.google.com/uc?export=download&id=", file_id)
 data <- read_delim(url, delim = ";",  show_col_types = FALSE)
-```
 
-    ## New names:
-    ## • `` -> `...18`
-
-``` r
 view(data)
 ```
 
