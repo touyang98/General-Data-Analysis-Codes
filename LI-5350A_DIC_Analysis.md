@@ -12,7 +12,7 @@ files.
 If you have any questions or concerns regarding to the code, please do
 not hesitate to reach out to Tia Ouyang (<touyang@umces.edu>).
 
-\##Install and Load All Required Packages
+## Install and Load All Required Packages
 
 ``` r
 if (!require("googledrive")) install.packages("googledrive")
@@ -28,11 +28,13 @@ library(writexl)
 library(readr)
 ```
 
-\##Read data files from Google Drive A publicly accessible link to the
-data file must be obtained from Google Drive by clicking “Get link” and
-changing the access setting to “Anyone with the link can view.” Identify
-the file ID from the link. The file ID is the long string located
-between /d/ and /view. Replace the example code with your own file ID.
+## Read data files from Google Drive
+
+A publicly accessible link to the data file must be obtained from Google
+Drive by clicking “Get link” and changing the access setting to “Anyone
+with the link can view.” Identify the file ID from the link. The file ID
+is the long string located between /d/ and /view. Replace the example
+code with your own file ID.
 
 For example:
 <https://drive.google.com/file/d/1wINgFaJyzGOTKv5hurTC9eaPycqkR_TZ/view?usp=share_link>
@@ -47,8 +49,10 @@ data <- read_delim(url, delim = ";",  show_col_types = FALSE)
 view(data)
 ```
 
-\##Clean and reorganize the data table This step removes unnecessary
-columns and rows for the purpose of calculating \[DIC\].
+## Clean and reorganize the data table
+
+This step removes unnecessary columns and rows for the purpose of
+calculating \[DIC\].
 
 ``` r
 data <- data.frame(data[,c(3,5,14,17)])
@@ -56,7 +60,7 @@ data <- subset(data, data$Status != "Excluded")
 view(data)
 ```
 
-\##Construct the calibration curve
+## Construct the calibration curve
 
 ``` r
 std_conc <- 3000 ##replace with [DIC] (uM) in your standards
@@ -100,7 +104,7 @@ ggplot(Cal,aes(x = std_conc*(Volume..ml./1000), y = Area..net.)) + geom_point(si
 
 ![](./-LI-5350A_DIC_Analysis_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
-\##Determination of \[DIC\] in samples using the calibration curve
+## Determination of \[DIC\] in samples using the calibration curve
 
 ``` r
 ##compute [DIC] using the calibration curve
@@ -111,7 +115,7 @@ data_analyze <- data.frame(aggregate(DIC ~ `Sample.Name`, data = data[-(1:9), ],
 data_analyze <- data.frame(samples = data_analyze$`Sample.Name`, DIC_mean = data_analyze$DIC[, "mean"], DIC_max  = data_analyze$DIC[, "max"], DIC_min  = data_analyze$DIC[, "min"])
 ```
 
-\##Export analyzed data
+## Export analyzed data
 
 ``` r
 ##save the file locally
