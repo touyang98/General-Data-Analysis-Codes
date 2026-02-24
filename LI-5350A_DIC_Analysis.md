@@ -56,7 +56,7 @@ calculating \[DIC\].
 
 ``` r
 data <- data.frame(data[,c(3,5,14,17)])
-data <- subset(data, data$Status != "Excluded")
+data <- subset(data, data$Status != "Excluded" & data$Status != "Halted")
 view(data)
 ```
 
@@ -127,7 +127,8 @@ path_xlsx <- paste0(path, "/", name)
 write_xlsx(data_analyze, path = path_xlsx)
 
 ##upload analyzed data to Google Drive
-drive_auth() ##Grants R permission to access Google Drive
+drive_auth() ##Grants R permission to access Google Drive; You may get message "Enter a number between 1 and 2, or enter 0 to exit", please enter a number. The R will automatically direct to an authorization page, please select the right Google Account and continue with granting all accesses. 
+
 ##A publicly accessible link for the folder where you want to store data must be obtained from Google Drive by clicking “Get link” and setting the access to “Anyone with the link can edit.” Next, identify the folder ID from the link. The folder ID is the long string located between "/folders/" and "?". Replace the example code with your own folder ID.
 folder <- "Example_Folder_ID"
 drive_upload(media = path_xlsx, path = as_id(folder), name = name)
