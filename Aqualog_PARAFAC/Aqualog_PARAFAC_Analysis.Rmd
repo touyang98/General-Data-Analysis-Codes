@@ -9,9 +9,13 @@ output: github_document
 
 ## Install and load required packages 
 ```{r install packages, message = FALSE}
+if (!require("magrittr")) install.packages("magrittr")
 if (!require("staRdom")) install.packages("staRdom")
+if (!require("dplyr")) install.packages("dplyr")
 
 library(staRdom)
+library(magrittr)
+library(dplyr)
 source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/Aqualog_PARAFAC/Abs_Analysis_Functions.R")
 ```
 
@@ -28,4 +32,46 @@ data_abs_corr <- blank_subtract(blank = 1, data = data_abs)
 abs_parm <- abs_parm_plus(data = data_abs_corr)
 ```
 
-## 
+## Read and initial process of eems data 
+```{r}
+path_eems <- "PARAFAC_Data/Raw_EEMs" ##replace the example with the path of your eems data folder/ file
+data_eems <- eem_read(path_eems, recursive = TRUE, import_function = "aqualog")
+
+## blank and baseline correction
+## note that the code will automatically delete the blank from the dataset
+data_eems_corr <- eem_corr(data = data_eems, blank = 1)
+```
+
+## Remove scattering 
+```{r}
+## set what types of scattering to remove 
+## each represents raman1, raman2, rayleigh1, and rayleigh2
+remove_scatter <- c(TRUE, TRUE, TRUE,TRUE)
+
+## set area of the scattering (i.e., water mark)
+remove_scatter_width <- c(15,20,15,20)
+
+## run eem_rem_scat
+data_eem_rem <- eem_rem_scat(data_eems_corr, remove_scatter = remove_scatter,remove_scatter_width = remove_scatter_width)
+
+## visualize the scattering remove 
+eem_overview_plot(data_eem_rem, spp=9, contour = TRUE)
+```
+
+## Interpolate the removed scattering 
+```{r}
+## interpolate the gaps (calculating the missing data based on mathematics)
+data_eem_interp <- eem_interp(data_eem_rem, cores = 8, type = 1, extend = FALSE)
+
+## visualize the data
+eem_overview_plot(data_eem_interp, spp=9, contour = TRUE)
+```
+
+## Smooth the data and evaluate the eems parameters
+```{r, message = FALSE}
+## smooth the data using eem_smooth function
+data_eem_smooth <- eem_smooth(data_eem_interp)
+
+## evaluate the eems parameter using eem_indice function written in EEMs_Analysis_Functions.R
+eem_indices <- eem_indice(data = data_eem_interp, output_name = eem_indices)
+```
