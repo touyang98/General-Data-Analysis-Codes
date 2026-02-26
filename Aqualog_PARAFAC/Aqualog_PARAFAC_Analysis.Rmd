@@ -17,6 +17,7 @@ library(staRdom)
 library(magrittr)
 library(dplyr)
 source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/Aqualog_PARAFAC/Abs_Analysis_Functions.R")
+source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/Aqualog_PARAFAC/EEMs_Analysis_Functions.R")
 ```
 
 ## Read absorbance data and  evaluate abs parameters
