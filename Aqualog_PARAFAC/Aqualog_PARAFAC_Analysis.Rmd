@@ -10,11 +10,9 @@ output: github_document
 ## Install and load required packages 
 ```{r install packages}
 if (!require("staRdom")) install.packages("staRdom")
-if (!require("remotes")) install.packages("remotes")
 
-remotes::install_github("touyang98/General-Data-Analysis-Codes")
 library(staRdom)
-library(General-Data-Analysis-Codes)
+source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/Aqualog_PARAFAC/Abs_Analysis_Functions.R")
 ```
 
 ## Read Aqualog data files 
@@ -22,4 +20,5 @@ Please save absorbance and eems data files into separate folders
 ```{r read files}
 ## read absorbance data 
 path_abs <- "PARAFAC_Data/Raw_Abs"
+data_abs <- read_abs(path_abs)
 ```
