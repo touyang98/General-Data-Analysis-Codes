@@ -32,3 +32,14 @@ eem_indice <- function(data, output_name){
   return(output_name)
   
 }
+
+
+PARAFAC_output <- function(data_PARAFAC, data_name, model){
+  
+  data_name <- as.data.frame(data_PARAFAC[[model]][["A"]])
+  
+  data_name$sample <- rownames(data_name)
+  
+  return(data_name)
+  
+}

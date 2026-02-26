@@ -12,9 +12,11 @@ output: github_document
 if (!require("magrittr")) install.packages("magrittr")
 if (!require("staRdom")) install.packages("staRdom")
 if (!require("dplyr")) install.packages("dplyr")
+if (!require("writexl")) install.packages("writexl")
 
 library(staRdom)
 library(magrittr)
+library(writexl)
 library(dplyr)
 source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/Aqualog_PARAFAC/Abs_Analysis_Functions.R")
 source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/Aqualog_PARAFAC/EEMs_Analysis_Functions.R")
@@ -69,7 +71,7 @@ eem_overview_plot(data_eem_interp, spp=9, contour = TRUE)
 ```
 
 ## Smooth the data and evaluate the eems parameters
-```{r, message = FALSE}
+```{r, message = FALSE, warning = FALSE}
 ## smooth the data using eem_smooth function
 data_eem_smooth <- eem_smooth(data_eem_interp)
 
@@ -78,7 +80,7 @@ eem_indices <- eem_indice(data = data_eem_interp, output_name = eem_indices)
 ```
 
 ## PARAFAC Model
-```{r, message=FALSE}
+```{r, message=FALSE, warning = FALSE}
 ## turn on the PARAFAC model in staRdom package
 data(pf_models)
 
@@ -140,10 +142,29 @@ exclude <- list("ex" = c(),
 eem_list_ex <- eem_exclude(eem_list, exclude)
 
 ## rerun the PARAFAC model with outlier-excluded data 
+## monitor the ctol, nstart, and maxit to increase accuracy of the model 
 pf3 <- eem_parafac(eem_list_ex, comps = seq(dim_min,dim_max), normalise = TRUE, maxit = maxit, nstart = nstart, ctol = ctol, cores = 8)
 pf3 <- lapply(pf3, eempf_rescaleBC, newscale = "Fmax")
 
-## visualize the data 
-eempf_plot_comps(pf3, contour = TRUE, type = 1)
+## visualize each components in the model 
+eempf_comp_load_plot(pf3[[1]], contour = TRUE)
+## note that PARAFAC model requires at least 50 data sets to model good components in EEMs; this is the reason why the test data set generate weird components
 ```
 
+## split-half analysis 
+```{r, eval=FALSE, echo=TRUE}
+sh <- splithalf(eem_list_ex, comps = 4, normalise = TRUE, rand = FALSE, cores = 8, nstart = nstart, strictly_converging = TRUE, maxit = maxit, ctol = ctol)
+
+splithalf_plot(sh)
+```
+
+## extract PARAFAC model output to a dataframe
+```{r}
+data_PARAFAC <- PARAFAC_output(pf3, data_PARAFAC, 1)
+```
+
+## export the PARAFAC model output to local computer 
+```{r, eval=FALSE, echo=TRUE}
+path_PARAFAC <- "Your_File_Path" ## replace the example with the path where you would like to save the file 
+write_xlsx(data_PARAFAC, path_PARAFAC)
+```
