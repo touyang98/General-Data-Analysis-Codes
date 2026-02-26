@@ -1,0 +1,243 @@
+Aqualog_PARAFAC_Analysis
+================
+Tianyin Ouyang
+2026-02-24
+
+## Introduction
+
+## Install and load required packages
+
+``` r
+if (!require("magrittr")) install.packages("magrittr")
+if (!require("staRdom")) install.packages("staRdom")
+if (!require("dplyr")) install.packages("dplyr")
+if (!require("writexl")) install.packages("writexl")
+
+library(staRdom)
+library(magrittr)
+library(writexl)
+library(dplyr)
+source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/Aqualog_PARAFAC/Abs_Analysis_Functions.R")
+source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/Aqualog_PARAFAC/EEMs_Analysis_Functions.R")
+```
+
+## Read absorbance data and evaluate abs parameters
+
+``` r
+## read absorbance data 
+path_abs <- "PARAFAC_Data/Raw_Abs"
+data_abs <- read_abs(path_abs)
+
+## blank correction 
+data_abs_corr <- blank_subtract(blank = 1, data = data_abs)
+
+## evaluate all abs parameters 
+abs_parm <- abs_parm_plus(data = data_abs_corr)
+```
+
+## Read and initial process of eems data
+
+``` r
+path_eems <- "PARAFAC_Data/Raw_EEMs" ##replace the example with the path of your eems data folder/ file
+data_eems <- eem_read(path_eems, recursive = TRUE, import_function = "aqualog")
+
+## blank and baseline correction
+## note that the code will automatically delete the blank from the dataset
+data_eems_corr <- eem_corr(data = data_eems, blank = 1)
+```
+
+## Remove scattering
+
+``` r
+## set what types of scattering to remove 
+## each represents raman1, raman2, rayleigh1, and rayleigh2
+remove_scatter <- c(TRUE, TRUE, TRUE,TRUE)
+
+## set area of the scattering (i.e., water mark)
+remove_scatter_width <- c(15,20,15,20)
+
+## run eem_rem_scat
+data_eem_rem <- eem_rem_scat(data_eems_corr, remove_scatter = remove_scatter,remove_scatter_width = remove_scatter_width)
+
+## visualize the scattering remove 
+eem_overview_plot(data_eem_rem, spp=9, contour = TRUE)
+```
+
+    ## [[1]]
+
+    ## Warning: Removed 16424 rows containing non-finite outside the scale range
+    ## (`stat_contour()`).
+
+![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+## Interpolate the removed scattering
+
+``` r
+## interpolate the gaps (calculating the missing data based on mathematics)
+data_eem_interp <- eem_interp(data_eem_rem, cores = 8, type = 1, extend = FALSE)
+
+## visualize the data
+eem_overview_plot(data_eem_interp, spp=9, contour = TRUE)
+```
+
+    ## [[1]]
+
+![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+## Smooth the data and evaluate the eems parameters
+
+``` r
+## smooth the data using eem_smooth function
+data_eem_smooth <- eem_smooth(data_eem_interp)
+
+## evaluate the eems parameter using eem_indice function written in EEMs_Analysis_Functions.R
+eem_indices <- eem_indice(data = data_eem_interp, output_name = eem_indices)
+```
+
+## PARAFAC Model
+
+``` r
+## turn on the PARAFAC model in staRdom package
+data(pf_models)
+
+## input minimum and maximum component numbers 
+dim_min <- 3
+dim_max <- 4
+
+## note: decrease ctol and nstart, and increase maxit can increase the model accuracy 
+nstart <- 25 # number of similar models from which best is chosen
+maxit = 5000 # maximum number of iterations in PARAFAC analysis 
+ctol <- 10^-6 # tolerance in PARAFAC analysis
+
+# calculating PARAFAC models
+pf1 <- eem_parafac(data_eem_smooth, comps = seq(dim_min,dim_max), normalise = FALSE, const = c("uncons", "uncons", "uncons"), maxit = maxit, nstart = nstart, ctol = ctol, cores = 8)
+
+# same model but using non-negative constraints
+pf1n <- eem_parafac(data_eem_smooth, comps = seq(dim_min,dim_max), normalise = FALSE, const = c("nonneg", "nonneg", "nonneg"), maxit = maxit, nstart = nstart, ctol = ctol, cores = 8)
+# rescale B and C modes to a maximum fluorescence of 1 for each component
+pf1 <- lapply(pf1, eempf_rescaleBC, newscale = "Fmax")
+pf1n <- lapply(pf1n, eempf_rescaleBC, newscale = "Fmax")
+```
+
+## visualize the data
+
+``` r
+## visualize the data 
+eempf_compare(pf1n, contour = TRUE)
+```
+
+    ## Warning in fortify(data, ...): Arguments in `...` must be used.
+    ## ✖ Problematic argument:
+    ## • contour = TRUE
+    ## ℹ Did you misspell an argument name?
+
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## ℹ The deprecated feature was likely used in the staRdom package.
+    ##   Please report the issue at
+    ##   <https://github.com/MatthiasPucher/staRdom/issues>.
+    ## This warning is displayed once per session.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+
+    ## [[1]]
+
+![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
+
+    ## 
+    ## [[2]]
+
+![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-6-5.png)<!-- -->
+
+    ## 
+    ## [[3]]
+
+![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-6-6.png)<!-- -->
+
+## normalize by the maximum fluorescence intensity
+
+``` r
+## change the normalization setting
+pf2 <- eem_parafac(data_eem_smooth, comps = seq(dim_min,dim_max), normalise = TRUE, const = c("nonneg", "nonneg", "nonneg"), maxit = maxit, nstart = nstart, ctol = ctol, cores = 8)
+
+## rescale B and C modes 
+pf2 <- lapply(pf2, eempf_rescaleBC, newscale = "Fmax")
+eempf_plot_comps(pf2, contour = TRUE, type = 1)
+```
+
+![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+``` r
+## visualize the data 
+eempf_plot_comps(pf2, contour = TRUE, type = 1)
+```
+
+![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
+
+## calculate the leverage and identify outliers
+
+``` r
+## leverage calculation
+cpl <- eempf_leverage(pf2[[1]])
+
+## visualize the data 
+eempf_leverage_plot(cpl,qlabel=0.1)
+```
+
+![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+## Exclude outliers and rerun the PARAFAC model
+
+``` r
+## construct a list of parameters that you would like to exclude from eems data list 
+exclude <- list("ex" = c(),
+                "em" = c(),
+                "sample" = c("B1S2Bowers_PierPEM"))
+
+## exclude outliers or potentially unwanted data at identified wavelengths 
+eem_list_ex <- eem_exclude(eem_list, exclude)
+
+## rerun the PARAFAC model with outlier-excluded data 
+## monitor the ctol, nstart, and maxit to increase accuracy of the model 
+pf3 <- eem_parafac(eem_list_ex, comps = seq(dim_min,dim_max), normalise = TRUE, maxit = maxit, nstart = nstart, ctol = ctol, cores = 8)
+pf3 <- lapply(pf3, eempf_rescaleBC, newscale = "Fmax")
+
+## visualize each components in the model 
+eempf_comp_load_plot(pf3[[1]], contour = TRUE)
+```
+
+    ## [[1]]
+
+![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+    ## 
+    ## [[2]]
+
+![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+
+``` r
+## note that PARAFAC model requires at least 50 data sets to model good components in EEMs; this is the reason why the test data set generate weird components
+```
+
+## split-half analysis
+
+``` r
+sh <- splithalf(eem_list_ex, comps = 4, normalise = TRUE, rand = FALSE, cores = 8, nstart = nstart, strictly_converging = TRUE, maxit = maxit, ctol = ctol)
+
+splithalf_plot(sh)
+```
+
+## extract PARAFAC model output to a dataframe
+
+``` r
+data_PARAFAC <- PARAFAC_output(pf3, data_PARAFAC, 1)
+```
+
+## export the PARAFAC model output to local computer
+
+``` r
+path_PARAFAC <- "Your_File_Path" ## replace the example with the path where you would like to save the file 
+write_xlsx(data_PARAFAC, path_PARAFAC)
+```
