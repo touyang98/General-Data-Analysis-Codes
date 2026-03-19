@@ -1,0 +1,45 @@
+---
+title: "ICP-OES_Cations_Analysis"
+author: "Tianyin Ouyang"
+date: "2026-03-19"
+output: github_document
+---
+
+## Install and Load All Required Packages 
+```{r, message = FALSE, warning = FALSE}
+if (!require("XML")) install.packages("XML")
+if (!require("dplyr")) install.packages("dplyr")
+
+library(dplyr)
+library(XML)
+source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/iCAP_ProSeries_ICP-OES/ICP-OES_Functions.R")
+```
+
+## Read data files from local computer
+```{r, eval=FALSE, echo=TRUE, message = FALSE, warning = FALSE}
+path <- "YOUR_FIlE_PATH"
+
+data_raw <- read_xml(path = path)
+```
+
+## Extra instrumental signal data
+```{r}
+data_ins <- extract_inst(data = data_raw)
+```
+
+## Identify cations, construct calibration curve, and evalute concentrations 
+```{r}
+## extract dataset that contain interested cations
+ion <- "Ca"
+data_Ca <- extract_ion(ion = ion, data = data_ins)
+
+## construct the calibration curve
+std_row <- c(2:8) ## monitor the standard inputs for the best calibration curve
+fit <- cal_curve(data = data_Ca, std_row = std_row, iFR_col = 2)## There are radical or axial iFR columns, choose one for analyses
+summary(fit)
+
+## evaluate concentrations 
+dilution_factor <- 80
+data_Ca$conc <- sample_conc(fit = fit, dilution_factor = dilution_factor, data = data_Ca, iFR_col = 2)
+
+```
