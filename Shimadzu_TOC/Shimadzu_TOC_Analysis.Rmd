@@ -1,5 +1,54 @@
 ---
 title: "Shimadzu_TOC_Analysis"
-output: html_document
+author: "Tianyin Ouyang"
+date: "2026-04-27"
+output: github_document
 ---
+## Introduction 
+This code is created to determine [NPOC] and [TDN] in water samples analyzed via Shimadzu TOC-L and TNM-L analyzer
+
+## Install and load required packages 
+```{r, messgae = FALSE}
+if (!require("readr")) install.packages("readr")
+if (!require("ggplot2")) install.packages("ggplot2")
+
+library(readr)
+library(ggplot2)
+source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/Shimadzu_TOC/Shimadzu_TOC_Functions.R")
+```
+
+## Read Shimadzu Data
+Export Shimadzu data to txt including all details
+```{r, message = FALSE}
+data <- read_delim("TOC_Test_Data.txt", delim = "\t", skip = 10)
+
+##remove the excluded data
+data <- subset(data , data$Excluded == 0)
+
+##optional: remove unwanted or failed data 
+data <- data[c(43:69,85:249),]
+
+##categorize the data into NPOC and TDN 
+data_NPOC <- subset(data, data$`Analysis(Inj.)` == "NPOC")
+data_TDN <- subset(data, data$`Analysis(Inj.)` == "TN")
+```
+
+## Construct the calibration curve 
+The extract_cal function is written to extract calibration curve standards from the raw data and to calculate the mean for each calibration points. 
+```{r}
+##NPOC calibration curve 
+std_conc_NPOC <- c(5, 2.5, 1, 0.5, 0.1)
+data_NPOC_cal <- extract_cal(data = data_NPOC, std_conc = std_conc_NPOC)
+fit_NPOC <- lm(data_NPOC_cal$Area ~ data_NPOC_cal$std_conc)
+plot_cal(data = data_NPOC_cal, fit = fit_NPOC)
+
+##TDN calibration curve 
+std_conc_TDN <- c(5, 2.5, 1, 0.5, 0.2)
+data_TDN_cal <- extract_cal(data = data_TDN, std_conc = std_conc_TDN)
+fit_TDN <- lm(data_TDN_cal$Area ~ data_TDN_cal$std_conc)
+
+##optional: what if my standard injection volume is not matching sample injection volume
+##for example: standard injection V is 40 uL, whereas the sample injection V is 100 uL. 
+data_TDN_cal$Area <- data_TDN_cal$Area/(40/100)
+```
 
