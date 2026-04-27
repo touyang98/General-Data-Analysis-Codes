@@ -43,3 +43,10 @@ PARAFAC_output <- function(data_PARAFAC, data_name, model){
   return(data_name)
   
 }
+
+
+extract_inst <- function(data){
+  
+  data <- subset(data, data[])
+  
+}

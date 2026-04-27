@@ -18,6 +18,7 @@ library(staRdom)
 library(magrittr)
 library(writexl)
 library(dplyr)
+
 source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/Aqualog_PARAFAC/Abs_Analysis_Functions.R")
 source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/Aqualog_PARAFAC/EEMs_Analysis_Functions.R")
 ```
@@ -25,11 +26,11 @@ source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/
 ## Read absorbance data and  evaluate abs parameters
 ```{r read files}
 ## read absorbance data 
-path_abs <- "PARAFAC_Data/Raw_Abs"
+path_abs <- "/Users/touyang/Downloads/Raw_Abs"
 data_abs <- read_abs(path_abs)
 
 ## blank correction 
-data_abs_corr <- blank_subtract(blank = 1, data = data_abs)
+data_abs_corr <- blank_subtract(blank = 3, data = data_abs)
 
 ## evaluate all abs parameters 
 abs_parm <- abs_parm_plus(data = data_abs_corr)
@@ -42,7 +43,7 @@ data_eems <- eem_read(path_eems, recursive = TRUE, import_function = "aqualog")
 
 ## blank and baseline correction
 ## note that the code will automatically delete the blank from the dataset
-data_eems_corr <- eem_corr(data = data_eems, blank = 1)
+data_eems_corr <- eem_corr(data = data_eems, blank = NULL)
 ```
 
 ## Remove scattering 
