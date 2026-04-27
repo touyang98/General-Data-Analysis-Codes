@@ -34,21 +34,51 @@ data_TDN <- subset(data, data$`Analysis(Inj.)` == "TN")
 ```
 
 ## Construct the calibration curve 
-The extract_cal function is written to extract calibration curve standards from the raw data and to calculate the mean for each calibration points. 
+The extract_cal function is written to extract calibration curve standards from the raw data and to calculate the mean for each calibration points.
+The plot_cal function is used to plot the calibration curve with linear fitted calibration curve equation shown.
 ```{r}
 ##NPOC calibration curve 
 std_conc_NPOC <- c(5, 2.5, 1, 0.5, 0.1)
 data_NPOC_cal <- extract_cal(data = data_NPOC, std_conc = std_conc_NPOC)
 fit_NPOC <- lm(data_NPOC_cal$Area ~ data_NPOC_cal$std_conc)
-plot_cal(data = data_NPOC_cal, fit = fit_NPOC)
+plot_cal(data = data_NPOC_cal, fit = fit_NPOC) + xlab("[NPOC] ppm")
 
 ##TDN calibration curve 
 std_conc_TDN <- c(5, 2.5, 1, 0.5, 0.2)
 data_TDN_cal <- extract_cal(data = data_TDN, std_conc = std_conc_TDN)
 fit_TDN <- lm(data_TDN_cal$Area ~ data_TDN_cal$std_conc)
-
 ##optional: what if my standard injection volume is not matching sample injection volume
 ##for example: standard injection V is 40 uL, whereas the sample injection V is 100 uL. 
 data_TDN_cal$Area <- data_TDN_cal$Area/(40/100)
+plot_cal(data = data_TDN_cal, fit = fit_TDN)+ xlab("[TDN] ppm")
+```
+## Determine the [NPOC] and [TDN] in water samples using the developed calibration curves 
+```{r}
+##determine the [NPOC] 
+data_NPOC_analyzed <- determ_conc(data = data_NPOC, fit = fit_NPOC)
+
+##determine the [TDN]
+data_TDN_analyzed <- determ_conc(data = data_TDN, fit = fit_TDN)
 ```
 
+## Optional: Multiply with dilution factors if needed 
+```{r}
+##NPOC dilution factor corrections
+data_NPOC_analyzed$dilution_factor <- c(6,6,1,6,6,1,6,6,1,6,6,6,6)
+data_NPOC_analyzed$conc_corr <- data_NPOC_analyzed$conc_mean * data_NPOC_analyzed$dilution_factor
+
+##TDN dilution factor corrections
+data_TDN_analyzed$dilution_factor <- c(6,6,1,6,6,1,6,6,1,6,6,6,6)
+data_TDN_analyzed$conc_corr <- data_TDN_analyzed$conc_mean * data_TDN_analyzed$dilution_factor
+```
+
+## Export analyzed data 
+```{r, eval=FALSE, echo=TRUE}
+##save the file locally
+##Note that you should replace the path with your own local file path, and the name with whatever you want to name your data file
+path <- "Local_File_Path"
+name <- "Your_File_Name.xlsx"
+
+path_xlsx <- paste0(path, "/", name)
+write_xlsx(data_analyze, path = path_xlsx)
+```

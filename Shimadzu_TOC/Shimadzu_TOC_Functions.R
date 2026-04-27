@@ -20,3 +20,19 @@ plot_cal <- function(data, fit){
   
   return(p)
 }
+
+
+determ_conc <- function(data, fit){
+  
+  data <- subset(data, data$Type != "Standard")
+  
+  data$conc <- (data$Area-coef(fit)[1])/coef(fit)[2]
+  
+  data_1 <- aggregate(conc ~ `Sample Name`, data, FUN = function(x) c(mean = mean(x), sd = sd(x)))
+  
+  data_1 <- do.call(data.frame, data_1)
+  
+  names(data_1) <- c("Sample Name", "conc_mean", "conc_sd")
+  
+  return(data_1)
+}
