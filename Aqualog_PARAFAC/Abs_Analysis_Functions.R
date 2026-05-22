@@ -1,25 +1,32 @@
-read_abs <- function(path_abs){
+read_abs <- function(path_abs) {
+  file_abs <- list.files(path = path_abs, pattern = "\\.dat$", full.names = TRUE)
   
-  ##read the data files from a folder 
-  file_abs <- list.files(path_abs, pattern = "\\.dat$", full.names = TRUE, recursive = TRUE)
+  # Read files, skipping the first 3 lines
+  data_abs <- lapply(file_abs, function(f) {
+    # skip = 3 ignores the three header rows
+    # col.names allows us to define the column names immediately
+    df <- read.table(f, skip = 3, header = FALSE, sep = "\t")
+    
+    # Assuming the first column is Wavelength (col 1) and XCorrect is the Absorbance (col 6)
+    # Adjust the indices [ , c(1, 6)] if your column order is different
+    df <- df[, c(1, 10)]
+    
+    colnames(df) <- c("wavelength", "abs")
+    
+    # Force conversion to numeric
+    df$wavelength <- as.numeric(df$wavelength)
+    df$abs <- as.numeric(df$abs)
+    
+    # Correct negative values
+    df$abs[df$abs < 0] <- 0
+    
+    return(df)
+  })
   
-  data_abs <- lapply(file_abs, read.table, header = FALSE)
-  
-  ##name the data files 
-  
-  names(data_abs) <- sub("\\.dat$", "", basename(file_abs))
-
-for (i in 1:length(data_abs)){
-  
-  colnames(data_abs[[i]]) <- c("wavelength", "abs")
-  
-  ##correct all negative values
-  data_abs[[i]]$abs[data_abs[[i]]$abs < 0] <- 0
+  names(data_abs) <- sub(".dat", "", basename(file_abs))
+  return(data_abs)
 }
 
-return(data_abs)
-
-}
 
 blank_subtract <- function(blank, data){
   
