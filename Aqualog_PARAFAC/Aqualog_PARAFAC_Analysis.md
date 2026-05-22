@@ -11,12 +11,15 @@ Tianyin Ouyang
 if (!require("magrittr")) install.packages("magrittr")
 if (!require("staRdom")) install.packages("staRdom")
 if (!require("dplyr")) install.packages("dplyr")
+if (!require("readr")) install.packages("readr")
 if (!require("writexl")) install.packages("writexl")
 
 library(staRdom)
 library(magrittr)
 library(writexl)
 library(dplyr)
+library(readr)
+
 source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/Aqualog_PARAFAC/Abs_Analysis_Functions.R")
 source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/Aqualog_PARAFAC/EEMs_Analysis_Functions.R")
 ```
@@ -25,7 +28,7 @@ source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/
 
 ``` r
 ## read absorbance data 
-path_abs <- "PARAFAC_Data/Raw_Abs"
+path_abs <- "/Users/touyang/General Data Analysis Codes/Aqualog_PARAFAC/Aqualog_Data/Raw_Abs"
 data_abs <- read_abs(path_abs)
 
 ## blank correction 
@@ -38,7 +41,7 @@ abs_parm <- abs_parm_plus(data = data_abs_corr)
 ## Read and initial process of eems data
 
 ``` r
-path_eems <- "PARAFAC_Data/Raw_EEMs" ##replace the example with the path of your eems data folder/ file
+path_eems <- "/Users/touyang/General Data Analysis Codes/Aqualog_PARAFAC/Aqualog_Data/Raw_EEMs" ##replace the example with the path of your eems data folder/ file
 data_eems <- eem_read(path_eems, recursive = TRUE, import_function = "aqualog")
 
 ## blank and baseline correction
@@ -65,7 +68,7 @@ eem_overview_plot(data_eem_rem, spp=9, contour = TRUE)
 
     ## [[1]]
 
-    ## Warning: Removed 16424 rows containing non-finite outside the scale range
+    ## Warning: Removed 24636 rows containing non-finite outside the scale range
     ## (`stat_contour()`).
 
 ![](Aqualog_PARAFAC_Analysis_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
