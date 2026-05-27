@@ -17,6 +17,20 @@ eem_corr <- function(data, blank){
   
 }
 
+eem_corr_nblank <- function(data){
+  
+  for(i in 1:length(data)){
+    
+    data[[i]][["x"]][data[[i]][["x"]] < 0] <- 0
+    
+  }
+  
+  # restore eemlist class (critical)
+  class(data) <- unique(c("eemlist", class(data)))
+  
+  return(data)
+  
+}
 
 eem_indice <- function(data, output_name){
   
