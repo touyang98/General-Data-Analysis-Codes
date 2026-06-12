@@ -95,7 +95,7 @@ eem_overview_plot(data_eem_interp, spp=9, contour = TRUE)
 data_eem_smooth <- eem_smooth(data_eem_interp)
 
 ## evaluate the eems parameter using eem_indice function written in EEMs_Analysis_Functions.R
-eem_indices <- eem_indice(data = data_eem_interp, output_name = eem_indices)
+eem_indices <- eem_indice(data = data_eem_smooth, output_name = eem_indices)
 ```
 
 ## PARAFAC Model
