@@ -28,6 +28,24 @@ read_abs <- function(path_abs) {
 }
 
 
+read_abs_Q <- function(path_abs){
+  file_abs <- list.files(path_abs, pattern = "\\.dat$", full.names = TRUE, recursive = TRUE)
+  
+  data_abs <- lapply(file_abs, read.table, header = FALSE)
+  
+  names(data_abs) <- sub("\\.dat$", "", basename(file_abs))
+  
+  for (i in 1:length(data_abs)){
+    
+    colnames(data_abs[[i]]) <- c("wavelength", "abs")
+    
+    data_abs[[i]]$abs[data_abs[[i]]$abs < 0] <- 0
+  }
+  
+  return(data_abs)
+}
+
+
 blank_subtract <- function(blank, data){
   
   for(i in 1:length(data)){
