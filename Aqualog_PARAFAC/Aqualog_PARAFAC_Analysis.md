@@ -30,7 +30,7 @@ source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/
 ## read absorbance data 
 path_abs <- "/Users/touyang/General Data Analysis Codes/Aqualog_PARAFAC/Aqualog_Data/Raw_Abs"
 data_abs <- read_abs(path_abs)
-###use data_abs_Q function to read the absorbance data if using Sample-Q to analyze all samples
+###use read_abs_Q function to read the absorbance data if using Sample-Q to analyze all samples
 
 ## blank correction 
 data_abs_corr <- blank_subtract(blank = 1, data = data_abs)
