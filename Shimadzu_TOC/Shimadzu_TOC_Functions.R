@@ -36,3 +36,8 @@ determ_conc <- function(data, fit){
   
   return(data_1)
 }
+
+std_conc <- function(data) {
+  std_conc <- unique(data$Conc.[data$Type == "Standard"])
+  return(std_conc)
+}
