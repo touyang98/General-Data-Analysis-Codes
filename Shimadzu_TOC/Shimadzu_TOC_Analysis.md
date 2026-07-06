@@ -12,23 +12,9 @@ analyzed via Shimadzu TOC-L and TNM-L analyzer
 
 ``` r
 if (!require("readr")) install.packages("readr")
-```
-
-    ## Loading required package: readr
-
-``` r
 if (!require("ggplot2")) install.packages("ggplot2")
-```
-
-    ## Loading required package: ggplot2
-
-``` r
 if (!require("writexl")) install.packages("writexl")
-```
 
-    ## Loading required package: writexl
-
-``` r
 library(readr)
 library(ggplot2)
 library(writexl)
@@ -55,14 +41,17 @@ data_TDN <- subset(data, data$`Analysis(Inj.)` == "TN")
 
 ## Construct the calibration curve
 
-The extract_cal function is written to extract calibration curve
-standards from the raw data and to calculate the mean for each
-calibration points. The plot_cal function is used to plot the
-calibration curve with linear fitted calibration curve equation shown.
+The std_conc function (inspired by Dr. Jeremy Schreier
+<jschreier@umces.edu>) aims to automatically identify standard
+concentrations that will be used for calibration curve development. The
+extract_cal function is written to extract calibration curve standards
+from the raw data and to calculate the mean for each calibration points.
+The plot_cal function is used to plot the calibration curve with linear
+fitted calibration curve equation shown.
 
 ``` r
 ##NPOC calibration curve 
-std_conc_NPOC <- c(5, 2.5, 1, 0.5, 0.1)
+std_conc_NPOC <- std_conc(data_NPOC)
 data_NPOC_cal <- extract_cal(data = data_NPOC, std_conc = std_conc_NPOC)
 fit_NPOC <- lm(data_NPOC_cal$Area ~ data_NPOC_cal$std_conc)
 plot_cal(data = data_NPOC_cal, fit = fit_NPOC) + xlab("[NPOC] ppm")
@@ -74,7 +63,7 @@ plot_cal(data = data_NPOC_cal, fit = fit_NPOC) + xlab("[NPOC] ppm")
 
 ``` r
 ##TDN calibration curve 
-std_conc_TDN <- c(5, 2.5, 1, 0.5, 0.2)
+std_conc_TDN <- std_conc(data_TDN)
 data_TDN_cal <- extract_cal(data = data_TDN, std_conc = std_conc_TDN)
 fit_TDN <- lm(data_TDN_cal$Area ~ data_TDN_cal$std_conc)
 ##optional: what if my standard injection volume is not matching sample injection volume
