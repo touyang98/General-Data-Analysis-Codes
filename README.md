@@ -11,7 +11,6 @@ The scripts are intended to make common data-cleaning, calibration, calculation,
 
 [IMPORTANT!!!]: These scripts are research-analysis templates rather than a fully automated software package. Instrument exports, calibration designs, sample layouts, dilution factors, and quality-control requirements may differ among laboratories and projects. Review and validate all settings before using calculated results.
 
-## Repository contents
 
 ## Repository contents
 
