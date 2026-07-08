@@ -112,3 +112,35 @@ sample_conc <- function(fit, dilution_factor, data, iFR_col){
 }
 
 
+analyze_list <- function(data, dilution_factor) {
+  
+  ions <- c(
+    "P", "Tl", "Zn", "Pb", "Cd", "Ni", "Co", "B", "Si", "Mn",
+    "Fe", "Mg", "Cr", "Ga", "V", "Cu", "In", "Ag", "U", "Ca",
+    "Sr", "Ba", "Na", "Li", "K", "Rb"
+  )
+  
+  data_analyzed <- lapply(ions, function(ion) {
+    extract_ion(ion = ion, data = data)
+  })
+  names(data_analyzed) <- ions
+  
+  std_row <- 2:8
+  
+  fit <- lapply(data_analyzed, function(x) {
+    cal_curve(data = x, std_row = std_row, iFR_col = 2)
+  })
+  names(fit) <- ions
+  
+  data_analyzed <- Map(function(x, f) {
+    x$conc <- sample_conc(
+      fit = f,
+      dilution_factor = dilution_factor,
+      data = x,
+      iFR_col = 2
+    )
+    x
+  }, data_analyzed, fit)
+  
+  return(data_analyzed)
+}

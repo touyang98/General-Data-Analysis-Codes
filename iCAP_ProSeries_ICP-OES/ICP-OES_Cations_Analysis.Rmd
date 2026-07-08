@@ -1,7 +1,7 @@
 ---
 title: "ICP-OES_Cations_Analysis"
 author: "Tianyin Ouyang"
-date: "2026-03-19"
+date: "2026-07-08"
 output: github_document
 ---
 
@@ -9,37 +9,58 @@ output: github_document
 ```{r, message = FALSE, warning = FALSE}
 if (!require("XML")) install.packages("XML")
 if (!require("dplyr")) install.packages("dplyr")
+if (!require("writexl")) install.packages("writexl")
 
 library(dplyr)
 library(XML)
+library(writexl)
 source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/main/iCAP_ProSeries_ICP-OES/ICP-OES_Functions.R")
 ```
 
 ## Read data files from local computer
 ```{r, eval=FALSE, echo=TRUE, message = FALSE, warning = FALSE}
-path <- "YOUR_FIlE_PATH"
+path <- "Test_Data_Ouyang.xml" ##replace with your file path
 
 data_raw <- read_xml(path = path)
 ```
 
 ## Extra instrumental signal data
+The extract_inst function is written to clean the spreadsheet and extract instrumental signals of all analyzed elements from the raw data.
 ```{r}
 data_ins <- extract_inst(data = data_raw)
 ```
 
-## Identify cations, construct calibration curve, and evalute concentrations 
+## Identify elements, construct calibration curve, and evalute concentrations individually 
+The extract_ion function is written to extract the interested element from the raw data. 
+The cal_curve is written to construct the calibration curve of interested element. 
+The sample_conc is written to calculate the concentration of interested element in samples based on the calibration curve and entered dilution fatcor. 
 ```{r}
-## extract dataset that contain interested cations
+## extract dataset that contain interested element individually 
 ion <- "Ca"
 data_Ca <- extract_ion(ion = ion, data = data_ins)
 
-## construct the calibration curve
+## construct the calibration curve individually 
 std_row <- c(2:8) ## monitor the standard inputs for the best calibration curve
 fit <- cal_curve(data = data_Ca, std_row = std_row, iFR_col = 2)## There are radical or axial iFR columns, choose one for analyses
 summary(fit)
 
 ## evaluate concentrations 
-dilution_factor <- 80
+dilution_factor <- 200
 data_Ca$conc <- sample_conc(fit = fit, dilution_factor = dilution_factor, data = data_Ca, iFR_col = 2)
 
+```
+
+## Calculate concentrations of all elements 
+The analyze_list function is written specifically to Pain Lab protocol, which can simutaneously calculate the concentration of 26 elements analyzed by Pain's ICP-OES instrument. 
+```{r, message=FALSE, warning = FALSE}
+data_analyzed <- analyze_list(data = data_ins, dilution_factor = 200)
+```
+
+## Export the data to local computer 
+```{r, eval=FALSE, echo=TRUE}
+path <- "Local_File_Path" ##replace with your local file path
+name <- "Your_File_Name.xlsx" ##replace with whatever you would like to name your file
+
+path_xlsx <- paste0(path, "/", name)
+write_xlsx(data_analyzed, path = path_xlsx)
 ```
