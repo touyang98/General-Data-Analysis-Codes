@@ -18,7 +18,7 @@ source("https://raw.githubusercontent.com/touyang98/General-Data-Analysis-Codes/
 ```
 
 ## Read data files from local computer
-```{r, eval=FALSE, echo=TRUE, message = FALSE, warning = FALSE}
+```{r, message = FALSE, warning = FALSE}
 path <- "Test_Data_Ouyang.xml" ##replace with your file path
 
 data_raw <- read_xml(path = path)
