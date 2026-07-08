@@ -44,7 +44,8 @@ General-Data-Analysis-Codes/
 │   └── TOC_Test_Data.txt
 ├── iCAP_ProSeries_ICP-OES/
 │   ├── ICP-OES_Functions.R
-│   └── ICP-OES_Cations_Analysis.Rmd
+|   ├── ICP-OES_Cations_Analysis.Rmd
+│   └── ICP-OES_Cations_Analysis.md
 ├── General Data Analysis Codes.Rproj
 └── README.md
 ```
